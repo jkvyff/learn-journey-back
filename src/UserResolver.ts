@@ -4,6 +4,7 @@ import { User } from './entity/User';
 import { MyContext } from './MyContext';
 import { createAccessToken, createRefreshToken } from './auth';
 import { isAuth } from './isAuth';
+import { sendRefreshToken } from './sendRefreshToken';
 
 
 @ObjectType()
@@ -51,12 +52,11 @@ export class UserResolver {
 			throw new Error ("Invalid Password");
 		}
 
-		res.cookie(
-			'jid', 
-			createRefreshToken(user), {
-				httpOnly: true,
-			}
-		)
+		res.cookie('jid', createRefreshToken(user), {
+			httpOnly: true,
+		})
+
+		sendRefreshToken(res, createRefreshToken(user));
 
 		return {
 			accessToken: createAccessToken(user)
