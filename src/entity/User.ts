@@ -11,8 +11,15 @@ export class User extends BaseEntity {
     @Field()
     @Column("text")
     email: string;
+
+    @Field()
+    @Column("text")
+    username: string;
     
     @Column("text")
     password: string;
+
+    @Column("int", { default: 0 })
+    tokenVersion: number;
 }
 User
