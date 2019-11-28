@@ -13,12 +13,27 @@ class ResourceInput {
     exerpt: String
 
     @Field()
-    date_published: Date
+    resolved_url: String
+
+    @Field(() => Int)
+    time_length: number
+}
+
+@InputType()
+class ResourceUpdateInput {
+    @Field()
+    title: String
+
+    @Field(() => String, { nullable: true })
+    author?: String
+
+    @Field(() => String, { nullable: true })
+    exerpt?: String
 
     @Field()
     resolved_url: String
 
-    @Field(() => Int)
+    @Field(() => Int, { nullable: true })
     time_length: number
 }
 
@@ -26,15 +41,32 @@ class ResourceInput {
 export class ResourceResolver {
     @Mutation(() => Resource)
     async createResource(
-        @Arg("input") input: ResourceInput
+        @Arg("options", () => ResourceInput) options: ResourceInput
     ) {
-        const resource = await Resource.insert(input);
+        const resource = await Resource.create(options).save();
         console.log(resource);
-        return ;
+        return resource;
+    }
+
+    @Mutation(() => Boolean)
+    async updateResource(
+        @Arg("id", () => Int) id: number,
+        @Arg("input",  () => ResourceUpdateInput) input: ResourceUpdateInput
+    ) {
+        await Resource.update({id}, input)
+        return true
+    }
+
+    @Mutation(() => Boolean)
+    async deleteResource(
+        @Arg("id", () => Int) id: number
+    ) {
+        await Resource.delete({id})
+        return true
     }
 
     @Query(() => [Resource]) 
     resources() {
-
+        return Resource.find();
     }
 }

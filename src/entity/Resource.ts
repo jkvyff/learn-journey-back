@@ -22,10 +22,6 @@ export class Resource extends BaseEntity {
 
     @Field()
     @Column('text')
-    date_published: Date
-
-    @Field()
-    @Column('text')
     resolved_url: String
 
     @Field(() => Int)
