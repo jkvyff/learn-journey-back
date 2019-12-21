@@ -1,5 +1,7 @@
-import { Resolver, Mutation, Arg, Query, InputType, Field, Int } from "type-graphql";
+import { Resolver, Mutation, Arg, Query, InputType, Field, Int, ArgsType, Args } from "type-graphql";
+import puppeteer from "puppeteer";
 import { Resource } from "../entity/Resource";
+import { Min, Max } from "class-validator";
 
 @InputType()
 class ResourceInput {
@@ -37,13 +39,32 @@ class ResourceUpdateInput {
     time_length: number
 }
 
+@ArgsType()
+class ResourcesArgs {
+  @Field(() => Int)
+  @Min(0)
+  skip: number = 0;
+
+  @Field(() => Int)
+  @Min(1)
+  @Max(50)
+  take: number = 20;
+}
+
 @Resolver()
 export class ResourceResolver {
     @Mutation(() => Resource)
     async createResource(
         @Arg("options", () => ResourceInput) options: ResourceInput
     ) {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(String(options.resolved_url));
+        await page.screenshot({path: 'example.png'});
+        await browser.close();
+
         const resource = await Resource.create(options).save();
+
         console.log(resource);
         return resource;
     }
@@ -66,7 +87,9 @@ export class ResourceResolver {
     }
 
     @Query(() => [Resource]) 
-    resources() {
-        return Resource.find();
+    resources(
+        @Args() { skip, take }: ResourcesArgs
+    ) {
+        return Resource.find({ skip, take });
     }
 }
